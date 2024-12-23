@@ -1,5 +1,7 @@
 # ld3z's Createpak
 
+![](https://raw.githubusercontent.com/ld3z/createpak-docs/refs/heads/main/src/assets/createpak_logo.webp)
+
 Eventually, this will all be moved to a separate site but currently, I am too lazy for that.
 
 Unfortunately, some issues with packwiz make this project completely unbearable, to the point that if there were a better tool, I would be using it.
