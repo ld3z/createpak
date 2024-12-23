@@ -84,11 +84,6 @@ hash = "4dcf7d71c0a539f19ed9cfdd568f72fddc3bde8419f2835cf0c210881ecdd6d1"
 metafile = true
 
 [[files]]
-file = "mods/create-deco.pw.toml"
-hash = "0bbb0d5c211ddf6fd76fd602167b1f012dbfe56e72c5f2568ec1089cd930ece0"
-metafile = true
-
-[[files]]
 file = "mods/create-dreams-desires.pw.toml"
 hash = "9546278e225818314e6c26dd252285f993c79937364f72b5800dcae2c724e47f"
 metafile = true
