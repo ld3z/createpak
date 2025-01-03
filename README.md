@@ -7,7 +7,7 @@
 A Minecraft modpack based on the huge Minecraft mod Create!
 <br/>
 <br/>
-<a href="https://ld3z.github.io/createpak-docs/"><strong>Explore the docs »</strong></a>
+<a href="https://createpak-docs.vercel.app/"><strong>Explore the docs »</strong></a>
 
   
 
