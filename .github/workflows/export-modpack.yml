@@ -28,7 +28,7 @@ jobs:
       - name: Export to Modrinth
         run: packwiz -y modrinth export -o modrinth.mrpack
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: modpack-exports
           path: |
