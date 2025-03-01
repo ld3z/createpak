@@ -24,24 +24,6 @@ jobs:
           go install github.com/packwiz/packwiz@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
-      - name: Verify pack.toml exists
-        run: |
-          if [ ! -f "pack.toml" ]; then
-            echo "Error: pack.toml not found in the root directory"
-            ls -la
-            exit 1
-          fi
-          echo "Found pack.toml in the root directory"
-
-      - name: Refresh modpack index
-        run: packwiz -y refresh
-
-      - name: Export to CurseForge
-        run: packwiz -y curseforge export -o curseforge.zip
-
-      - name: Export to Modrinth
-        run: packwiz -y modrinth export -o modrinth.mrpack
-      
       - name: Generate changelog
         if: github.event_name == 'release'
         id: changelog
@@ -69,6 +51,28 @@ jobs:
           CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
           
           echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
+
+      - name: Export CurseForge Pack
+        run: |
+          cd curseforge
+          if [ ! -f "pack.toml" ]; then
+            echo "Error: pack.toml not found in curseforge directory"
+            ls -la
+            exit 1
+          fi
+          packwiz -y refresh
+          packwiz -y curseforge export -o ../curseforge.zip
+
+      - name: Export Modrinth Pack
+        run: |
+          cd modrinth
+          if [ ! -f "pack.toml" ]; then
+            echo "Error: pack.toml not found in modrinth directory"
+            ls -la
+            exit 1
+          fi
+          packwiz -y refresh
+          packwiz -y modrinth export -o ../modrinth.mrpack
 
       - uses: actions/upload-artifact@v4
         with:
