@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changelog generation
 
       - name: Install Packwiz
         run: |
-          curl -L -o packwiz.zip https://nightly.link/packwiz/packwiz/workflows/go/master/packwiz-linux-64.zip
-          unzip packwiz.zip
-          chmod +x packwiz
+          curl -sL https://packwiz.infra.link/install.sh | bash
           sudo mv packwiz /usr/local/bin/
 
       - name: Refresh modpack index
@@ -27,10 +27,53 @@ jobs:
 
       - name: Export to Modrinth
         run: packwiz -y modrinth export -o modrinth.mrpack
+      
+      - name: Generate changelog
+        if: github.event_name == 'release'
+        id: changelog
+        run: |
+          # Get the current tag and find previous tag
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          
+          echo "Generating changelog from $PREVIOUS_TAG to $CURRENT_TAG"
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # No previous tag, get all commits
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" $CURRENT_TAG)
+          else
+            # Get commits between tags
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" $PREVIOUS_TAG..$CURRENT_TAG)
+          fi
+          
+          # Save changelog to file
+          echo "$CHANGELOG" > changelog.md
+          
+          # Create multiline output for GitHub Actions
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          
+          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v4
         with:
           name: modpack-exports
           path: |
             curseforge.zip
-            modrinth.mrpack 
+            modrinth.mrpack
+            changelog.md
+
+      - name: Upload Release Assets
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            curseforge.zip
+            modrinth.mrpack
+            changelog.md
+          body: |
+            ## Changelog
+            ${{ steps.changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
