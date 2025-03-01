@@ -16,7 +16,10 @@ jobs:
 
       - name: Install Packwiz
         run: |
-          curl -sL https://packwiz.infra.link/install.sh | bash
+          # Download packwiz directly from GitHub releases
+          PACKWIZ_VERSION="v0.5.2"
+          curl -sLo packwiz "https://github.com/packwiz/packwiz/releases/download/${PACKWIZ_VERSION}/packwiz-linux-amd64"
+          chmod +x packwiz
           sudo mv packwiz /usr/local/bin/
 
       - name: Refresh modpack index
