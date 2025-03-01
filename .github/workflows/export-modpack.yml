@@ -19,10 +19,46 @@ jobs:
         with:
           go-version: '1.20'
 
+      - name: Cache Go modules and packwiz
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/go/bin/packwiz
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-packwiz-v1
+          restore-keys: |
+            ${{ runner.os }}-go-packwiz-
+
       - name: Install Packwiz
         run: |
-          go install github.com/packwiz/packwiz@latest
+          # Check if packwiz is already installed from cache
+          if [ ! -f ~/go/bin/packwiz ]; then
+            echo "Installing packwiz..."
+            go install github.com/packwiz/packwiz@latest
+          else
+            echo "Using cached packwiz installation"
+          fi
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Update version numbers on release
+        if: github.event_name == 'release'
+        run: |
+          # Extract version from release tag
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Updating modpack version to $VERSION"
+          
+          # Update version in CurseForge pack.toml
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" curseforge/pack.toml
+          
+          # Update version in Modrinth pack.toml
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" modrinth/pack.toml
+          
+          # Commit changes if this is a release
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add curseforge/pack.toml modrinth/pack.toml
+          git commit -m "Update modpack version to $VERSION [skip ci]"
+          git push
 
       - name: Generate changelog
         if: github.event_name == 'release'
