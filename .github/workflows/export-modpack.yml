@@ -24,6 +24,15 @@ jobs:
           go install github.com/packwiz/packwiz@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
+      - name: Verify pack.toml exists
+        run: |
+          if [ ! -f "pack.toml" ]; then
+            echo "Error: pack.toml not found in the root directory"
+            ls -la
+            exit 1
+          fi
+          echo "Found pack.toml in the root directory"
+
       - name: Refresh modpack index
         run: packwiz -y refresh
 
@@ -77,8 +86,6 @@ jobs:
             curseforge.zip
             modrinth.mrpack
             changelog.md
-          body: |
-            ## Changelog
-            ${{ steps.changelog.outputs.changelog }}
+          body_path: changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
